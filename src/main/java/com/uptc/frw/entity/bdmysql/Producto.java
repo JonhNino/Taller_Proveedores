@@ -8,13 +8,15 @@ import jakarta.persistence.Table;
 import java.util.List;
 
 @Entity
-@Table(name = "PRODUCTOS")
+@Table(name = "productos")
 public class Producto {
 
     @Id
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "nombre")
     private String nombre;
 
     @Column(name = "precio_unitario")

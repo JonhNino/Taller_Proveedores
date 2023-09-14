@@ -7,10 +7,9 @@ import jakarta.persistence.Persistence;
 public class PersistenceUtil {
     private static EntityManagerFactory MY_ENTITY_MANAGER_FACTORY;
 
-
-    public static EntityManager getEntityManagerOra(){
+    public static EntityManager getEntityManager(){
         if(MY_ENTITY_MANAGER_FACTORY==null){
-            MY_ENTITY_MANAGER_FACTORY = Persistence.createEntityManagerFactory("feriaUnitOra");
+            MY_ENTITY_MANAGER_FACTORY = Persistence.createEntityManagerFactory("feriaUnitMy");
         }
         return MY_ENTITY_MANAGER_FACTORY.createEntityManager();
     }

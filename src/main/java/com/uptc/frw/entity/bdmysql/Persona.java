@@ -6,14 +6,18 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "PERSONAS")
+@Table(name = "personas")
 public class Persona {
 
     @Id
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "nombres")
     private String nombres;
+
+    @Column(name = "apellidos")
     private String apellidos;
 
     @Column(name = "fecha_nacimiento")
@@ -33,7 +37,7 @@ public class Persona {
 
     @ManyToMany
     @JoinTable(
-            name = "PRODUCTOS_PERSONAS",
+            name = "Productos_personas",
             joinColumns = @JoinColumn(name = "persona_id"),
             inverseJoinColumns = @JoinColumn(name = "producto_id")
     )

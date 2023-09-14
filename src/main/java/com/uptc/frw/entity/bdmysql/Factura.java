@@ -7,13 +7,15 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "FACTURAS")
+@Table(name = "facturas")
 public class Factura {
 
     @Id
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "fecha")
     private Date fecha;
 
     @ManyToOne

@@ -4,13 +4,15 @@ package com.uptc.frw.entity.bdmysql;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "DETALLES")
+@Table(name = "detalles")
 public class Detalle {
 
     @Id
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "cantidad")
     private Integer cantidad;
 
     @Column(name = "precio_venta")

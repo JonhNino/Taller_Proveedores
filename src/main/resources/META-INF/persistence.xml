@@ -5,11 +5,10 @@
              version="3.0">
   <persistence-unit name="feriaUnitMy">
     <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
-    <class>com.uptc.frw.entity.my.BookMy</class>
-    <class>com.uptc.frw.entity.my.EditionMy</class>
-    <class>com.uptc.frw.entity.my.BillMy</class>
-    <class>com.uptc.frw.entity.my.BillDetailMy</class>
-    <class>com.uptc.frw.entity.my.PersonMy</class>
+    <class>com.uptc.frw.entity.bdmysql.Detalle</class>
+    <class>com.uptc.frw.entity.bdmysql.Producto</class>
+    <class>com.uptc.frw.entity.bdmysql.Persona</class>
+    <class>com.uptc.frw.entity.bdmysql.Factura</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="javax.persistence.jdbc.driver" value="org.mariadb.jdbc.Driver" />
