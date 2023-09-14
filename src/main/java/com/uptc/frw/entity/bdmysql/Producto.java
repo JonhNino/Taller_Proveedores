@@ -31,8 +31,7 @@ public class Producto {
     public Producto() {
     }
 
-    public Producto(Long id, String nombre, Double precioUnitario) {
-        this.id = id;
+    public Producto(String nombre, Double precioUnitario) {
         this.nombre = nombre;
         this.precioUnitario = precioUnitario;
     }
