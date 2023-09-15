@@ -29,10 +29,11 @@ public class Detalle {
     public Detalle() {
     }
 
-    public Detalle(Long id, Integer cantidad, Double precioVenta) {
-        this.id = id;
+    public Detalle(Integer cantidad, Double precioVenta, Factura factura, Producto producto) {
         this.cantidad = cantidad;
         this.precioVenta = precioVenta;
+        this.factura = factura;
+        this.producto = producto;
     }
 
     public Long getId() {
