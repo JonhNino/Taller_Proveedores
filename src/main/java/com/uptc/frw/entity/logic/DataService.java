@@ -4,11 +4,13 @@ import com.uptc.frw.entity.bdmysql.Factura;
 import com.uptc.frw.entity.bdmysql.Persona;
 import com.uptc.frw.entity.bdmysql.Producto;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
 public class DataService {
@@ -98,22 +100,27 @@ public class DataService {
 
     private static void createPerson(EntityManager entityManager, int numeroDeRegistros) throws ParseException {
 
-        entityManager.getTransaction().begin();
         Scanner scanner = new Scanner(System.in);
         SimpleDateFormat formatoFecha = new SimpleDateFormat("yyyy/MM/dd");
         for (int i = 0; i < numeroDeRegistros; i++) {
 
             System.out.println("Registro de persona " + (i + 1));
             Persona persona = obtenerInformacionPersona(scanner, formatoFecha);
+
+            if(!entityManager.getTransaction().isActive()){
+                entityManager.getTransaction().begin();
+            }
+
             agregarProductosAPersona(entityManager, scanner, persona);
             entityManager.persist(persona);
 
-
         }
+
         entityManager.getTransaction().commit();
     }
 
     private static void agregarProductosAPersona(EntityManager entityManager, Scanner scanner, Persona persona) {
+
         while (true) {
             System.out.print("¿Desea agregar un producto a la persona? (s/n): ");
             String respuesta = scanner.nextLine();
@@ -121,18 +128,32 @@ public class DataService {
             if (respuesta.equalsIgnoreCase("n")) {
                 break;
             }
-            System.out.print("Ingrese el ID del Producto para la Persosna " + persona.getNombres() + ": ");
+            mostrarTodosLosProductos(entityManager);
+            System.out.print("Ingrese el ID del Producto para la Persona " + persona.getNombres() + ": ");
             Long idProducto = scanner.nextLong();
             scanner.nextLine();
-            Producto producto =entityManager.find(Producto.class,idProducto);
-            persona.getProductos().add(producto);
-            producto.getPersonas().add(persona);
-            entityManager.persist(persona);
-            entityManager.persist(producto);
-
-            entityManager.getTransaction().commit();
+            Producto producto = entityManager.find(Producto.class, idProducto);
+            System.out.println(producto);
+           // if (producto != null) {
+                persona.getProductos().add(producto);
+                producto.getPersonas().add(persona);
+                entityManager.persist(persona);
+                entityManager.persist(producto);
+            //} else {
+              //  System.out.println("Producto no encontrado con el ID: " + idProducto);
+            //}
         }
+    }
 
+    public static void mostrarTodosLosProductos(EntityManager entityManager) {
+        TypedQuery<Producto> query = entityManager.createQuery("SELECT p FROM Producto p", Producto.class);
+        List<Producto> productos = query.getResultList();
+        for (Producto producto : productos) {
+            System.out.println("ID: " + producto.getId());
+            System.out.println("Nombre: " + producto.getNombre());
+            System.out.println("Precio Unitario: " + producto.getPrecioUnitario());
+            System.out.println("-----------");
+        }
     }
 
     private static Persona obtenerInformacionPersona(Scanner scanner, SimpleDateFormat formatoFecha) {
