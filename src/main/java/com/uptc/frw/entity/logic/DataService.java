@@ -1,5 +1,6 @@
 package com.uptc.frw.entity.logic;
 
+import com.uptc.frw.entity.bdmysql.Factura;
 import com.uptc.frw.entity.bdmysql.Persona;
 import com.uptc.frw.entity.bdmysql.Producto;
 import jakarta.persistence.EntityManager;
@@ -11,9 +12,8 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class DataService {
-    private EntityManager entityManager;
-    static Scanner scanner = new Scanner(System.in);
 
+    private EntityManager entityManager;
 
     public DataService(EntityManager entityManager) {
         this.entityManager = entityManager;
@@ -21,23 +21,59 @@ public class DataService {
 
     public static void insertData(EntityManager entityManager) throws ParseException {
 
+        Scanner scanner = new Scanner(System.in);
         System.out.print("¿Cuantos registros deseas ingresar en cada tabla? ");
         int numeroDeRegistros = scanner.nextInt();
         System.out.print("Vamos a Crear " + numeroDeRegistros + " registos en Cada tabla de la BD MAPEO_PROVEEDORES\n");
-        entityManager.getTransaction().begin();
-        System.out.print("Iniciamos Creando los registros para la tabla Personas\n");
-        createPerson(entityManager, numeroDeRegistros);
-        System.out.print("Ahora Crearemos los registros para la tabla Productos\n");
+        System.out.print("Iniciamos Creando los registros para la tabla Productos\n");
         createProductos(entityManager, numeroDeRegistros);
-
-        entityManager.getTransaction().commit();
+        System.out.print("Ahora Crearemos los registros para la tabla Personas\n");
+        createPerson(entityManager, numeroDeRegistros);
+        System.out.print("Ahora Crearemos los registros para la tabla Facturas\n");
+        createFacturas(entityManager, numeroDeRegistros);
+        System.out.print("Ahora Crearemos los registros para la tabla Facturas\n");
+        createFacturas(entityManager, numeroDeRegistros);
 
     }
 
-    private static void createProductos(EntityManager entityManager, int numeroDeRegistros) {
+    private static void createFacturas(EntityManager entityManager, int numeroDeRegistros) {
+        entityManager.getTransaction().begin();
         Scanner scanner = new Scanner(System.in);
-        for(int i = 0; i < numeroDeRegistros; i++) {
-            System.out.println("Creacion de producto " + (i+1));
+        SimpleDateFormat formatoFecha = new SimpleDateFormat("yyyy/MM/dd");
+        for (int i = 0; i < numeroDeRegistros; i++) {
+            System.out.print("Ingrese la fecha de la factura ");
+            Date fechaFact = obtenerFecha(scanner, formatoFecha);
+
+            Persona cliente = obtenerPersonaPorID(entityManager, scanner, "cliente", i + 1);
+            Persona vendedor = obtenerPersonaPorID(entityManager, scanner, "vendedor", i + 1);
+
+            Factura factura = new Factura(fechaFact, cliente, vendedor);
+            entityManager.persist(factura);
+        }
+        entityManager.getTransaction().commit();
+    }
+
+    public static Persona obtenerPersonaPorID(EntityManager entityManager, Scanner scanner, String tipoPersona, int numeroFactura) {
+        Persona persona = null;
+        while (persona == null) {
+            System.out.print("Ingrese el ID del " + tipoPersona + " para la factura " + numeroFactura + ": ");
+            Long idPersona = scanner.nextLong();
+            scanner.nextLine();
+            persona = entityManager.find(Persona.class, idPersona);
+
+            if (persona == null) {
+                System.out.println("No se encontró un " + tipoPersona + " con el ID " + idPersona + ". Intentelo de nuevo.");
+            }
+        }
+        return persona;
+    }
+
+    private static void createProductos(EntityManager entityManager, int numeroDeRegistros) {
+
+        entityManager.getTransaction().begin();
+        Scanner scanner = new Scanner(System.in);
+        for (int i = 0; i < numeroDeRegistros; i++) {
+            System.out.println("Creacion de producto " + (i + 1));
 
             System.out.print("Ingrese el nombre del producto: ");
             String nombre = scanner.nextLine();
@@ -53,44 +89,77 @@ public class DataService {
                     scanner.next();
                 }
             }
-
             Producto producto = new Producto(nombre, precioUnitario);
             entityManager.persist(producto);
+
         }
+        entityManager.getTransaction().commit();
     }
 
     private static void createPerson(EntityManager entityManager, int numeroDeRegistros) throws ParseException {
+
+        entityManager.getTransaction().begin();
         Scanner scanner = new Scanner(System.in);
         SimpleDateFormat formatoFecha = new SimpleDateFormat("yyyy/MM/dd");
         for (int i = 0; i < numeroDeRegistros; i++) {
 
             System.out.println("Registro de persona " + (i + 1));
-
-            System.out.print("Ingrese el nombre: ");
-            String nombre = scanner.nextLine();
-
-            System.out.print("Ingrese los apellidos: ");
-            String apellidos = scanner.nextLine();
-
-            Date fechaNacimiento = null;
-            while (fechaNacimiento == null) {
-                System.out.print("Ingrese la fecha de nacimiento (YYYY/MM/DD): ");
-                String fechaStr = scanner.nextLine();
-                try {
-                    fechaNacimiento = formatoFecha.parse(fechaStr);
-                } catch (ParseException e) {
-                    System.out.println("Fecha no válida. Por favor, inténtelo de nuevo.");
-                }
-            }
-
-            System.out.print("Ingrese el tipo de documento: ");
-            String tipoDocumento = scanner.nextLine();
-
-            System.out.print("Ingrese el número de documento: ");
-            String numeroDocumento = scanner.nextLine();
-
-            Persona persona = new Persona(nombre, apellidos, fechaNacimiento, tipoDocumento, numeroDocumento);
+            Persona persona = obtenerInformacionPersona(scanner, formatoFecha);
+            agregarProductosAPersona(entityManager, scanner, persona);
             entityManager.persist(persona);
+
+
         }
+        entityManager.getTransaction().commit();
+    }
+
+    private static void agregarProductosAPersona(EntityManager entityManager, Scanner scanner, Persona persona) {
+        while (true) {
+            System.out.print("¿Desea agregar un producto a la persona? (s/n): ");
+            String respuesta = scanner.nextLine();
+
+            if (respuesta.equalsIgnoreCase("n")) {
+                break;
+            }
+            System.out.print("Ingrese el ID del Producto para la Persosna " + persona.getNombres() + ": ");
+            Long idProducto = scanner.nextLong();
+            scanner.nextLine();
+            Producto producto =entityManager.find(Producto.class,idProducto);
+            persona.getProductos().add(producto);
+            producto.getPersonas().add(persona);
+            entityManager.persist(persona);
+            entityManager.persist(producto);
+
+            entityManager.getTransaction().commit();
+        }
+
+    }
+
+    private static Persona obtenerInformacionPersona(Scanner scanner, SimpleDateFormat formatoFecha) {
+        System.out.print("Ingrese el nombre: ");
+        String nombre = scanner.nextLine();
+        System.out.print("Ingrese los apellidos: ");
+        String apellidos = scanner.nextLine();
+        System.out.print("Ingrese la fecha de nacimiento ");
+        Date fechaNacimiento = obtenerFecha(scanner, formatoFecha);
+        System.out.print("Ingrese el tipo de documento: ");
+        String tipoDocumento = scanner.nextLine();
+        System.out.print("Ingrese el numero de documento: ");
+        String numeroDocumento = scanner.nextLine();
+        return new Persona(nombre, apellidos, fechaNacimiento, tipoDocumento, numeroDocumento);
+    }
+
+    private static Date obtenerFecha(Scanner scanner, SimpleDateFormat formatoFecha) {
+        Date fecha = null;
+        while (fecha == null) {
+            System.out.print("(YYYY/MM/DD): ");
+            String fechaStr = scanner.nextLine();
+            try {
+                fecha = formatoFecha.parse(fechaStr);
+            } catch (ParseException e) {
+                System.out.println("Fecha no válida. Por favor, inténtelo de nuevo.");
+            }
+        }
+        return fecha;
     }
 }

@@ -32,9 +32,13 @@ public class Factura {
     public Factura() {
     }
 
-    public Factura(Long id, Date fecha) {
-        this.id = id;
+    public Factura(Date fecha, Persona cliente, Persona vendedor) {
         this.fecha = fecha;
+        this.cliente = cliente;
+        this.vendedor = vendedor;
+    }
+
+    public Factura(Date fechaFact, Long id, Long id1) {
     }
 
     public Long getId() {
