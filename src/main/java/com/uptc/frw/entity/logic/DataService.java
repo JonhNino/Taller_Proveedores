@@ -8,10 +8,7 @@ import jakarta.persistence.TypedQuery;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.InputMismatchException;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class DataService {
 
@@ -33,7 +30,7 @@ public class DataService {
         createPerson(entityManager, numeroDeRegistros);
         System.out.print("Ahora Crearemos los registros para la tabla Facturas\n");
         createFacturas(entityManager, numeroDeRegistros);
-        System.out.print("Ahora Crearemos los registros para la tabla Facturas\n");
+        System.out.print("Ahora Crearemos los registros para la tabla Detalles Facturas\n");
         createFacturas(entityManager, numeroDeRegistros);
 
     }
@@ -45,10 +42,8 @@ public class DataService {
         for (int i = 0; i < numeroDeRegistros; i++) {
             System.out.print("Ingrese la fecha de la factura ");
             Date fechaFact = obtenerFecha(scanner, formatoFecha);
-
             Persona cliente = obtenerPersonaPorID(entityManager, scanner, "cliente", i + 1);
             Persona vendedor = obtenerPersonaPorID(entityManager, scanner, "vendedor", i + 1);
-
             Factura factura = new Factura(fechaFact, cliente, vendedor);
             entityManager.persist(factura);
         }
@@ -107,12 +102,12 @@ public class DataService {
             System.out.println("Registro de persona " + (i + 1));
             Persona persona = obtenerInformacionPersona(scanner, formatoFecha);
 
-            if(!entityManager.getTransaction().isActive()){
+            if (!entityManager.getTransaction().isActive()) {
                 entityManager.getTransaction().begin();
             }
 
-            agregarProductosAPersona(entityManager, scanner, persona);
             entityManager.persist(persona);
+            agregarProductosAPersona(entityManager, scanner, persona);
 
         }
 
@@ -122,26 +117,38 @@ public class DataService {
     private static void agregarProductosAPersona(EntityManager entityManager, Scanner scanner, Persona persona) {
 
         while (true) {
-            System.out.print("¿Desea agregar un producto a la persona? (s/n): ");
+            System.out.print("¿Desea agregar un producto a la persona " + persona.getNombres()+" "+persona.getApellidos()+"? (s/n): ");
             String respuesta = scanner.nextLine();
 
             if (respuesta.equalsIgnoreCase("n")) {
                 break;
             }
             mostrarTodosLosProductos(entityManager);
-            System.out.print("Ingrese el ID del Producto para la Persona " + persona.getNombres() + ": ");
-            Long idProducto = scanner.nextLong();
-            scanner.nextLine();
-            Producto producto = entityManager.find(Producto.class, idProducto);
-            System.out.println(producto);
-           // if (producto != null) {
-                persona.getProductos().add(producto);
-                producto.getPersonas().add(persona);
-                entityManager.persist(persona);
-                entityManager.persist(producto);
-            //} else {
-              //  System.out.println("Producto no encontrado con el ID: " + idProducto);
-            //}
+            ingresarProductoCliente(entityManager, scanner,persona);
+
+        }
+    }
+
+    public static  void ingresarProductoCliente(EntityManager entityManager, Scanner scanner, Persona persona){
+        System.out.print("Ingrese el ID del Producto para la Persona " + persona.getNombres() + ": ");
+        Long idProducto = scanner.nextLong();
+        scanner.nextLine();
+        Producto producto = entityManager.find(Producto.class, idProducto);
+        System.out.println(producto);
+        System.out.println(persona);
+        if (producto != null) {
+            if (persona.getProductos() == null) {
+                persona.setProductos(new ArrayList<>());
+            }
+            if (producto.getPersonas() == null) {
+                producto.setPersonas(new ArrayList<>());
+            }
+            persona.getProductos().add(producto);
+            producto.getPersonas().add(persona);
+            entityManager.persist(persona);
+            entityManager.persist(producto);
+        } else {
+            System.out.println("Producto no encontrado con el ID: " + idProducto);
         }
     }
 
