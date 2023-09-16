@@ -24,15 +24,16 @@ public class DataService {
         Scanner scanner = new Scanner(System.in);
         System.out.print("¿Cuantos registros deseas ingresar en cada tabla? ");
         int numeroDeRegistros = scanner.nextInt();
-        System.out.print("Vamos a Crear " + numeroDeRegistros + " registos en Cada tabla de la BD MAPEO_PROVEEDORES\n");
-        /*  System.out.print("Iniciamos Creando los registros para la tabla Productos\n");
-         createProductos(entityManager, numeroDeRegistros);
-          System.out.print("Ahora Crearemos los registros para la tabla Personas\n");
-          createPerson(entityManager, numeroDeRegistros);
+        /*     System.out.print("Vamos a Crear " + numeroDeRegistros + " registos en Cada tabla de la BD MAPEO_PROVEEDORES\n");
+        System.out.print("Iniciamos Creando los registros para la tabla Productos\n");
+        createProductos(entityManager, numeroDeRegistros);
+        System.out.print("Ahora Crearemos los registros para la tabla Personas\n");
+        createPerson(entityManager, numeroDeRegistros);
         System.out.print("Ahora Crearemos los registros para la tabla Facturas\n");
         createFacturas(entityManager, numeroDeRegistros);
 
          */
+
         System.out.print("Ahora Crearemos los registros para la tabla Detalles Facturas\n");
         createDetallesFacturas(entityManager, numeroDeRegistros);
     }
@@ -43,15 +44,22 @@ public class DataService {
 
         for (int i = 0; i < numeroDeRegistros; i++) {
             System.out.println("Creacion del Detalle " + (i + 1));
-
+            mostrarTodosLosFacturas(entityManager);
+            System.out.print("Ingrese el id de la Factura a detallar : ");
+            Long idFactrura = scanner.nextLong();
+            scanner.nextLine();
+            Factura factura = entityManager.find(Factura.class, idFactrura);
+            System.out.println(factura);
+            
             System.out.print("Ingrese la cantidad de Productos a Cobrar: ");
             Integer cantidad = scanner.nextInt();
             scanner.nextLine();
-            mostrarTodosLosProductos(entityManager);
+
             Double precioVenta = null;
             Producto producto = null;
             while (precioVenta == null) {
                 try {
+                    mostrarTodosLosProductosCliente(entityManager, idFactrura,factura);
                     System.out.print("Ingrese el id del Producto a detallar : ");
                     Long idProducto = scanner.nextLong();
                     scanner.nextLine();
@@ -64,17 +72,22 @@ public class DataService {
                     scanner.next();
                 }
             }
-            mostrarTodosLosFacturas(entityManager);
-            System.out.print("Ingrese el id de la Factura a detallar : ");
-            Long idFactrura = scanner.nextLong();
-            scanner.nextLine();
-            Factura factura = entityManager.find(Factura.class, idFactrura);
-            System.out.println(factura);
+
 
             Detalle detalle = new Detalle(cantidad, precioVenta, factura, producto);
             entityManager.persist(detalle);
         }
         entityManager.getTransaction().commit();
+    }
+
+    private static void mostrarTodosLosProductosCliente(EntityManager entityManager, Long idFactrura,Factura factura
+    ) {
+        TypedQuery<Persona> query = entityManager.createQuery(
+                "SELECT p FROM Persona p JOIN FETCH p.productos WHERE p.id = :clienteId",
+                Persona.class
+        );
+        query.setParameter("clienteId", factura.getCliente());
+        List<Persona> personas = query.getResultList();
     }
 
     private static void mostrarTodosLosFacturas(EntityManager entityManager) {
