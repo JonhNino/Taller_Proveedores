@@ -10,40 +10,42 @@ import java.util.List;
 import java.util.Scanner;
 
 public class QueryBill {
-    private EntityManager entityManager;
 
-    public QueryBill(EntityManager entityManager) {
+    private EntityManager entityManager;
+    private Scanner scanner;
+
+    public QueryBill(EntityManager entityManager, Scanner scanner) {
         this.entityManager = entityManager;
+        this.scanner = scanner;
     }
 
-    public static void queryBills(EntityManager entityManager) {
-        Scanner scanner = new Scanner(System.in);
-        List<Long> listaIdsClientes = mostrarClientes(entityManager);
+    public void queryBills() {
+        List<Long> listaIdsClientes = mostrarClientes();
 
-        while(true) {
+        while (true) {
             System.out.println("Ingrese el Id del Cliente al que se le va a Consultar sus Facturas: ");
             long idCliente = scanner.nextLong();
 
-            if(listaIdsClientes.contains(idCliente)) {
-                mostrarFacturas(entityManager, idCliente);
+            if (listaIdsClientes.contains(idCliente)) {
+                mostrarFacturas(idCliente);
                 break;
             } else {
-                System.out.println("Ese no es un Id de cliente valido. Por favor, ingrese otro Id.");
+                System.out.println("Ese no es un Id de cliente válido. Por favor, ingrese otro Id.");
             }
         }
     }
 
 
-    private static void mostrarFacturas(EntityManager entityManager, Long idCliente) {
-        entityManager.getTransaction().begin();
+    private void mostrarFacturas(Long idCliente) {
+        beginTransaction();
 
         try {
             TypedQuery<Factura> query = entityManager.createQuery(
                     "SELECT f FROM Factura f WHERE f.cliente.id = :idCliente", Factura.class);
             query.setParameter("idCliente", idCliente);
-            Persona cliente=  entityManager.getReference(Persona.class,idCliente);
-            System.out.println("El Cliente " + cliente.getNombres()+" "
-                    + cliente.getApellidos() + " tiene las siguientes facturas Asociadas:");
+
+            Persona cliente = entityManager.find(Persona.class, idCliente);
+            System.out.println("El Cliente " + cliente.getNombres() + " " + cliente.getApellidos() + " tiene las siguientes facturas Asociadas:");
 
             List<Factura> facturas = query.getResultList();
 
@@ -53,20 +55,19 @@ public class QueryBill {
                 for (Factura factura : facturas) {
                     System.out.println("ID Factura: " + factura.getId());
                     System.out.println("Fecha: " + factura.getFecha());
-
                     System.out.println("---------------------------");
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            entityManager.getTransaction().commit();
+            commitTransaction();
         }
     }
 
-    private static List<Long> mostrarClientes(EntityManager entityManager) {
+    private List<Long> mostrarClientes() {
         List<Long> listaIdsClientes = new ArrayList<>();
-        entityManager.getTransaction().begin();
+        beginTransaction();
 
         try {
             TypedQuery<Persona> query = entityManager.createQuery(
@@ -79,17 +80,24 @@ public class QueryBill {
                 System.out.print(" Nombre: " + persona.getNombres());
                 System.out.println(" Apellido: " + persona.getApellidos());
 
-                listaIdsClientes.add(persona.getId()); // Almacenando el ID del cliente en la lista
+                listaIdsClientes.add(persona.getId());
             }
 
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            entityManager.getTransaction().commit();
+            commitTransaction();
         }
 
         return listaIdsClientes;
     }
 
+    private void beginTransaction() {
+        entityManager.getTransaction().begin();
+    }
+
+    private void commitTransaction() {
+        entityManager.getTransaction().commit();
+    }
 
 }

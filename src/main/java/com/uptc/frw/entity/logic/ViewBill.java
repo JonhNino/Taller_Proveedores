@@ -6,44 +6,36 @@ import com.uptc.frw.entity.model.Persona;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class ViewBill {
+    private final EntityManager entityManager;
+    private final Scanner scanner;
 
-    public static void viewBill(EntityManager entityManager) {
-        Scanner scanner = new Scanner(System.in);
-        List<Long> facturaIds = mostrarFacturas(entityManager);
-        Long idFactura = null;
-
-        do {
-            System.out.println("Ingrese el Id de la Factura a Consultar ");
-            idFactura = scanner.nextLong();
-
-            if (!facturaIds.contains(idFactura)) {
-                System.out.println("El ID ingresado no es valido. Por favor, intente nuevamente.");
-            } else {
-                break;
-            }
-        } while (true);
-
-        queryBill(entityManager, idFactura);
+    public ViewBill(EntityManager entityManager, Scanner scanner) {
+        this.entityManager = entityManager;
+        this.scanner = scanner;
     }
 
+    public void viewBill() {
+        List<Long> facturaIds = mostrarFacturas();
+        Long idFactura = obtenerIdFactura(facturaIds);
+        mostrarDetalleFactura(idFactura);
+    }
 
-    private static void queryBill(EntityManager entityManager, Long idfactura) {
+    private void mostrarDetalleFactura(Long idFactura) {
         entityManager.getTransaction().begin();
-        Factura factura = entityManager.getReference(Factura.class, idfactura);
-        createFactura(entityManager, factura);
+        Factura factura = entityManager.find(Factura.class, idFactura);
+        imprimirDetalleFactura(factura);
         entityManager.getTransaction().commit();
     }
 
-    private static void createFactura(EntityManager entityManager, Factura factura) {
+    private void imprimirDetalleFactura(Factura factura) {
         System.out.println("Factura #  " + factura.getId());
         System.out.println();
         System.out.println(String.format("Cliente: %-30s Fecha Compra: %s", factura.getCliente().getNombres() + " " + factura.getCliente().getApellidos(), factura.getFecha()));
-        System.out.println("Direccion del Cliente: "+factura.getCliente().getDireccion() );
+        System.out.println("Direccion del Cliente: " + factura.getCliente().getDireccion());
         System.out.println();
 
         System.out.println(String.format("%-8s %-20s %-10s %-25s %-10s", "Id Item", "Nombre Producto", "Cantidad", "Valor Unitario de Venta", "Valor"));
@@ -61,10 +53,27 @@ public class ViewBill {
         System.out.println();
         System.out.println(String.format("%65s %-10.2f", "TOTAL", total));
         System.out.println();
-        System.out.println("Atendido Por : " + factura.getVendedor().getNombres()+" "+factura.getVendedor().getApellidos());
+        System.out.println("Atendido Por : " + factura.getVendedor().getNombres() + " " + factura.getVendedor().getApellidos());
     }
 
-    private static List<Long> mostrarFacturas(EntityManager entityManager) {
+
+    private Long obtenerIdFactura(List<Long> facturaIds) {
+        Long idFactura;
+        do {
+            System.out.println("Ingrese el Id de la Factura a Consultar");
+            idFactura = scanner.nextLong();
+
+            if (!facturaIds.contains(idFactura)) {
+                System.out.println("El ID ingresado no es valido. Por favor, intente nuevamente.");
+            } else {
+                break;
+            }
+        } while (true);
+
+        return idFactura;
+    }
+
+    private List<Long> mostrarFacturas() {
         TypedQuery<Long> query = entityManager.createQuery(
                 "SELECT DISTINCT f.id FROM Factura f JOIN Detalle d ON f.id = d.factura.id order by f.id ",
                 Long.class
@@ -75,18 +84,18 @@ public class ViewBill {
         for (Long facturaId : facturaIds) {
             Factura factura = entityManager.find(Factura.class, facturaId);
 
-            if(factura != null) {
+            if (factura != null) {
                 System.out.println("ID: " + factura.getId());
                 System.out.println("Fecha de Factura: " + factura.getFecha());
 
                 Persona cliente = factura.getCliente();
-                if(cliente != null) {
+                if (cliente != null) {
                     System.out.println("Id del Cliente Asociado a esta Factura: " + cliente.getId());
                     System.out.println("Nombre del Cliente " + cliente.getNombres() + " " + cliente.getApellidos());
                 }
 
                 Persona vendedor = factura.getVendedor();
-                if(vendedor != null) {
+                if (vendedor != null) {
                     System.out.println("Id del Vendedor Asociado a esta Factura: " + vendedor.getId());
                     System.out.println("Nombre del Vendedor " + vendedor.getNombres() + " " + vendedor.getApellidos());
                 }

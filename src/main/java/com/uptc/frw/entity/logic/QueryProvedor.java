@@ -11,8 +11,15 @@ import java.util.Scanner;
 
 public class QueryProvedor {
 
-    public static void queryProduct(EntityManager entityManager) {
-        Scanner scanner = new Scanner(System.in);
+    private static final String ERROR_MSG = "Ha ocurrido un error: ";
+
+    private Scanner scanner;
+
+    public QueryProvedor(Scanner scanner) {
+        this.scanner = scanner;
+    }
+
+    public void queryProduct(EntityManager entityManager) {
         List<Long> proveedorIds = mostrarProveedores(entityManager);
 
         while (true) {
@@ -20,16 +27,16 @@ public class QueryProvedor {
             long idProveedor = scanner.nextLong();
 
             if (proveedorIds.contains(idProveedor)) {
-                mostrarProductos(entityManager,idProveedor);
+                mostrarProductos(entityManager, idProveedor);
                 break;
             } else {
-                System.out.println("Este Id no corresponde a un proveedor valido. Por favor, intente de nuevo.");
+                System.out.println("Este Id no corresponde a un proveedor válido. Por favor, intente de nuevo.");
             }
         }
     }
 
 
-    private static List<Long> mostrarProveedores(EntityManager entityManager) {
+    private List<Long> mostrarProveedores(EntityManager entityManager) {
         List<Long> proveedorIds = new ArrayList<>();
         entityManager.getTransaction().begin();
         System.out.println("Lista De Proveedores.");
@@ -40,7 +47,7 @@ public class QueryProvedor {
             );
             List<Persona> proveedores = query.getResultList();
 
-            if(proveedores.isEmpty()) {
+            if (proveedores.isEmpty()) {
                 System.out.println("No se encontraron proveedores.");
             } else {
                 for (Persona proveedor : proveedores) {
@@ -52,16 +59,14 @@ public class QueryProvedor {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(ERROR_MSG + e.getMessage());
         } finally {
             entityManager.getTransaction().commit();
         }
         return proveedorIds;
     }
 
-
-
-    public static void mostrarProductos(EntityManager entityManager, long idProveedor) {
+    public void mostrarProductos(EntityManager entityManager, long idProveedor) {
         try {
             TypedQuery<Producto> query = entityManager.createQuery(
                     "SELECT p FROM Producto p JOIN p.personas pers WHERE pers.id = :idProveedor",
@@ -71,11 +76,11 @@ public class QueryProvedor {
 
             List<Producto> productos = query.getResultList();
 
-            if(productos.isEmpty()) {
+            if (productos.isEmpty()) {
                 System.out.println("No se encontraron productos para el proveedor con ID: " + idProveedor);
             } else {
-                Persona persona =entityManager.getReference(Persona.class,idProveedor);
-                System.out.println("El Proveedor "+persona.getNombres()+" "+persona.getApellidos()+" tiene los Siguentes productos asociados:");
+                Persona persona = entityManager.getReference(Persona.class, idProveedor);
+                System.out.println("El Proveedor " + persona.getNombres() + " " + persona.getApellidos() + " tiene los Siguentes productos asociados:");
                 for (Producto producto : productos) {
                     System.out.println("ID: " + producto.getId());
                     System.out.println("Nombre: " + producto.getNombre());
@@ -83,7 +88,7 @@ public class QueryProvedor {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(ERROR_MSG + e.getMessage());
         }
     }
 

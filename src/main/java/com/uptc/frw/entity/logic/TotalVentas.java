@@ -10,38 +10,41 @@ import java.util.List;
 import java.util.Scanner;
 
 public class TotalVentas {
-    public static void totalVentas(EntityManager entityManager) {
-        Scanner scanner = new Scanner(System.in);
-        List<Long> vendedorIds = mostrarVendedores(entityManager);
+    private final Scanner scanner;
 
-        long idVendedor = -1;
-        boolean idValido = false;
+    public TotalVentas(Scanner scanner) {
+        this.scanner = scanner;
+    }
 
-        while (!idValido) {
-            System.out.println("Ingrese el Id del Vendedor al que se le va a Consultar el total de sus Ventas");
+    public void mostrarTotalVentas(EntityManager entityManager) {
+        List<Long> vendedorIds = obtenerVendedorIds(entityManager);
+
+        long idVendedor;
+        while (true) {
+            System.out.println("Ingrese el ID del vendedor para consultar el total de sus ventas:");
             idVendedor = scanner.nextLong();
 
             if (vendedorIds.contains(idVendedor)) {
-                idValido = true;
+                break;
             } else {
                 System.out.println("El ID ingresado no pertenece a un vendedor. Por favor, intente de nuevo.");
             }
         }
 
-        queryVentas(entityManager,idVendedor);
-        Persona vendedor = entityManager.getReference(Persona.class,idVendedor);
-        System.out.println("El vendedor "+vendedor.getNombres()+" "+vendedor.getApellidos()
-                +" a realizado "+queryVentas(entityManager,idVendedor).size()+
-                " ventas, con un total de : "+
-                queryDetalles(entityManager,queryVentas(entityManager,idVendedor)));
+        List<Long> facturaIds = obtenerFacturaIdsPorVendedor(entityManager, idVendedor);
+        Persona vendedor = entityManager.getReference(Persona.class, idVendedor);
+        System.out.println("El vendedor " + vendedor.getNombres() + " " + vendedor.getApellidos()
+                + " ha realizado " + facturaIds.size() + " ventas, con un total de: " +
+                calcularTotalVentas(entityManager, facturaIds));
     }
 
-    private static double queryDetalles(EntityManager entityManager, List<Long> facturaIds) {
+    private double calcularTotalVentas(EntityManager entityManager, List<Long> facturaIds) {
         double totalVentas = 0.0;
+
         try {
             entityManager.getTransaction().begin();
 
-            for(Long facturaId : facturaIds) {
+            for (Long facturaId : facturaIds) {
                 TypedQuery<Detalle> query = entityManager.createQuery(
                         "SELECT d FROM Detalle d WHERE d.factura.id = :facturaId", Detalle.class);
                 query.setParameter("facturaId", facturaId);
@@ -52,7 +55,7 @@ public class TotalVentas {
                     System.out.println("ID Factura: " + facturaId);
                     System.out.println("ID Detalle: " + detalle.getId());
                     System.out.println("Precio Venta: " + detalle.getPrecioVenta());
-                    totalVentas += detalle.getPrecioVenta();  // Sumamos el precio de venta a totalVentas
+                    totalVentas += detalle.getPrecioVenta();
                     System.out.println("-----------");
                 }
             }
@@ -64,13 +67,13 @@ public class TotalVentas {
                 entityManager.getTransaction().rollback();
             }
         }
-        return  totalVentas;
+
+        return totalVentas;
     }
 
-
-
-    private static List<Long> queryVentas(EntityManager entityManager, long idVendedor) {
+    private List<Long> obtenerFacturaIdsPorVendedor(EntityManager entityManager, long idVendedor) {
         List<Long> facturaIds = new ArrayList<>();
+
         try {
             entityManager.getTransaction().begin();
 
@@ -82,23 +85,18 @@ public class TotalVentas {
 
             entityManager.getTransaction().commit();
         } catch (Exception e) {
-            e.printStackTrace();
-            if (entityManager.getTransaction().isActive()) {
-                entityManager.getTransaction().rollback();
-            }
+            gestionarExcepcionTransaccion(entityManager, e);
         }
 
         return facturaIds;
     }
 
-
-
-    private static List<Long> mostrarVendedores(EntityManager entityManager) {
-        entityManager.getTransaction().begin();
-
+    private List<Long> obtenerVendedorIds(EntityManager entityManager) {
         List<Long> vendedorIds = new ArrayList<>();
 
         try {
+            entityManager.getTransaction().begin();
+
             TypedQuery<Persona> query = entityManager.createQuery(
                     "SELECT DISTINCT p FROM Persona p INNER JOIN p.facturasComoVendedor f", Persona.class);
 
@@ -114,14 +112,20 @@ public class TotalVentas {
                     System.out.println(" Apellido: " + persona.getApellidos());
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
+
             entityManager.getTransaction().commit();
+        } catch (Exception e) {
+            gestionarExcepcionTransaccion(entityManager, e);
         }
 
         return vendedorIds;
     }
 
-
+    private void gestionarExcepcionTransaccion(EntityManager entityManager, Exception e) {
+        e.printStackTrace();
+        if (entityManager.getTransaction().isActive()) {
+            entityManager.getTransaction().rollback();
+        }
+    }
 }
+
