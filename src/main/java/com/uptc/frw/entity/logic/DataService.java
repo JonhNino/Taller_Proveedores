@@ -1,9 +1,9 @@
 package com.uptc.frw.entity.logic;
 
-import com.uptc.frw.entity.bdmysql.Detalle;
-import com.uptc.frw.entity.bdmysql.Factura;
-import com.uptc.frw.entity.bdmysql.Persona;
-import com.uptc.frw.entity.bdmysql.Producto;
+import com.uptc.frw.entity.model.Detalle;
+import com.uptc.frw.entity.model.Factura;
+import com.uptc.frw.entity.model.Persona;
+import com.uptc.frw.entity.model.Producto;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
@@ -24,15 +24,17 @@ public class DataService {
         Scanner scanner = new Scanner(System.in);
         System.out.print("¿Cuantos registros deseas ingresar en cada tabla? ");
         int numeroDeRegistros = scanner.nextInt();
-        /*     System.out.print("Vamos a Crear " + numeroDeRegistros + " registos en Cada tabla de la BD MAPEO_PROVEEDORES\n");
+/*
+        System.out.print("Vamos a Crear " + numeroDeRegistros + " registos en Cada tabla de la BD MAPEO_PROVEEDORES\n");
         System.out.print("Iniciamos Creando los registros para la tabla Productos\n");
+
         createProductos(entityManager, numeroDeRegistros);
         System.out.print("Ahora Crearemos los registros para la tabla Personas\n");
         createPerson(entityManager, numeroDeRegistros);
         System.out.print("Ahora Crearemos los registros para la tabla Facturas\n");
         createFacturas(entityManager, numeroDeRegistros);
 
-         */
+ */
 
         System.out.print("Ahora Crearemos los registros para la tabla Detalles Facturas\n");
         createDetallesFacturas(entityManager, numeroDeRegistros);
@@ -50,7 +52,7 @@ public class DataService {
             scanner.nextLine();
             Factura factura = entityManager.find(Factura.class, idFactrura);
             System.out.println(factura);
-            
+
             System.out.print("Ingrese la cantidad de Productos a Cobrar: ");
             Integer cantidad = scanner.nextInt();
             scanner.nextLine();
@@ -59,7 +61,7 @@ public class DataService {
             Producto producto = null;
             while (precioVenta == null) {
                 try {
-                    mostrarTodosLosProductosCliente(entityManager, idFactrura,factura);
+                    mostrarTodosLosProductosCliente(entityManager);
                     System.out.print("Ingrese el id del Producto a detallar : ");
                     Long idProducto = scanner.nextLong();
                     scanner.nextLine();
@@ -80,15 +82,19 @@ public class DataService {
         entityManager.getTransaction().commit();
     }
 
-    private static void mostrarTodosLosProductosCliente(EntityManager entityManager, Long idFactrura,Factura factura
-    ) {
-        TypedQuery<Persona> query = entityManager.createQuery(
-                "SELECT p FROM Persona p JOIN FETCH p.productos WHERE p.id = :clienteId",
-                Persona.class
+    private static void mostrarTodosLosProductosCliente(EntityManager entityManager) {
+        TypedQuery<Producto> query = entityManager.createQuery(
+                "SELECT p FROM Producto p",
+                Producto.class
         );
-        query.setParameter("clienteId", factura.getCliente());
-        List<Persona> personas = query.getResultList();
+        List<Producto> productos = query.getResultList();
+        for (Producto producto : productos) {
+            System.out.println("ID: " + producto.getId() +
+                    ", Nombre: " + producto.getNombre() +
+                    ", Precio Unitario: " + producto.getPrecioUnitario());
+        }
     }
+
 
     private static void mostrarTodosLosFacturas(EntityManager entityManager) {
         TypedQuery<Factura> query = entityManager.createQuery("SELECT p FROM Factura p", Factura.class);
@@ -140,8 +146,9 @@ public class DataService {
 
         TypedQuery<Persona> query;
 
+
         if (tipoPersona.equalsIgnoreCase("Cliente")) {
-            query = entityManager.createQuery("SELECT p FROM Persona p JOIN FETCH p.productos", Persona.class);
+            query = entityManager.createQuery("SELECT p FROM Persona p WHERE NOT EXISTS (SELECT 1 FROM p.productos)", Persona.class);
         } else if (tipoPersona.equalsIgnoreCase("Vendedor")) {
             query = entityManager.createQuery("SELECT p FROM Persona p WHERE NOT EXISTS (SELECT 1 FROM p.productos)", Persona.class);
         } else {
@@ -151,19 +158,10 @@ public class DataService {
         List<Persona> personas = query.getResultList();
 
         for (Persona persona : personas) {
+
             System.out.println("ID: " + persona.getId());
             System.out.println("Nombre: " + persona.getNombres());
             System.out.println("Apellidos: " + persona.getApellidos());
-
-            if (tipoPersona.equalsIgnoreCase("Cliente")) {
-                System.out.println("Productos asociados:");
-                for (Producto producto : persona.getProductos()) {
-                    System.out.println(" - " + producto.getNombre());
-                }
-            } else {
-                System.out.println("Esta persona no tiene productos asociados es un Vendedor.");
-            }
-
             System.out.println("-----------");
 
         }
@@ -222,20 +220,28 @@ public class DataService {
 
     private static void agregarProductosAPersona(EntityManager entityManager, Scanner scanner, Persona persona) {
 
-        while (true) {
-            System.out.print("¿Desea agregar un producto a la persona " + persona.getNombres() + " " + persona.getApellidos() + "? (s/n): ");
-            String respuesta = scanner.nextLine();
+        System.out.print("¿Desea marcar a " + persona.getNombres() + " " + persona.getApellidos() + " como proveedor? (s/n): ");
+        String respuestaProveedor = scanner.nextLine();
 
-            if (respuesta.equalsIgnoreCase("n")) {
-                break;
+        if (respuestaProveedor.equalsIgnoreCase("s")) {
+            while (true) {
+                System.out.print("¿Desea agregar un producto al proveedor " + persona.getNombres() + " " + persona.getApellidos() + "? (s/n): ");
+                String respuesta = scanner.nextLine();
+
+                if (respuesta.equalsIgnoreCase("n")) {
+                    break;
+                }
+
+                mostrarTodosLosProductos(entityManager);
+                ingresarProductoProveedor(entityManager, scanner, persona);
             }
-            mostrarTodosLosProductos(entityManager);
-            ingresarProductoCliente(entityManager, scanner, persona);
-
+        } else {
+            System.out.println(persona.getNombres() + " " + persona.getApellidos() + " no es marcado como proveedor.");
         }
     }
 
-    public static void ingresarProductoCliente(EntityManager entityManager, Scanner scanner, Persona persona) {
+
+    public static void ingresarProductoProveedor(EntityManager entityManager, Scanner scanner, Persona persona) {
         System.out.print("Ingrese el ID del Producto para la Persona " + persona.getNombres() + ": ");
         Long idProducto = scanner.nextLong();
         scanner.nextLine();

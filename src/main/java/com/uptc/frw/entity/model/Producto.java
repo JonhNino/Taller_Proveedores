@@ -1,19 +1,19 @@
-package com.uptc.frw.entity.bdmysql;
+package com.uptc.frw.entity.model;
 
-import jakarta.persistence.Entity;
+import com.uptc.frw.entity.model.Detalle;
+import com.uptc.frw.entity.model.Persona;
 import jakarta.persistence.*;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 
 import java.util.List;
 
 @Entity
 @Table(name = "productos")
+@SequenceGenerator(name = "PRODUCTOS_SEQ_GEN", sequenceName = "PRODUCTOS_SEQ", allocationSize = 1)
 public class Producto {
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PRODUCTOS_SEQ_GEN")
     private Long id;
 
     @Column(name = "nombre")
@@ -22,10 +22,9 @@ public class Producto {
     @Column(name = "precio_unitario")
     private Double precioUnitario;
 
-    @ManyToMany(mappedBy = "productos")
-    private List<Persona> personas;
+    @ManyToMany(mappedBy = "productos", cascade = CascadeType.ALL) private List<Persona> personas;
 
-    @OneToMany(mappedBy = "producto")
+    @OneToMany(mappedBy = "producto",cascade = CascadeType.ALL)
     private List<Detalle> detalles;
 
     public Producto() {

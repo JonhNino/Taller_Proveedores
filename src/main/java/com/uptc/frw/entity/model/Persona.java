@@ -1,5 +1,7 @@
-package com.uptc.frw.entity.bdmysql;
+package com.uptc.frw.entity.model;
 
+import com.uptc.frw.entity.model.Factura;
+import com.uptc.frw.entity.model.Producto;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -7,11 +9,12 @@ import java.util.List;
 
 @Entity
 @Table(name = "personas")
+@SequenceGenerator(name = "PERSONAS_SEQ_GEN", sequenceName = "PERSONAS_SEQ", allocationSize = 1)
 public class Persona {
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PERSONAS_SEQ_GEN")
     private Long id;
 
     @Column(name = "nombres")
@@ -29,13 +32,13 @@ public class Persona {
     @Column(name = "numero_documento")
     private String numeroDocumento;
 
-    @OneToMany(mappedBy = "cliente")
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
     private List<Factura> facturasComoCliente;
 
-    @OneToMany(mappedBy = "vendedor")
+    @OneToMany(mappedBy = "vendedor", cascade = CascadeType.ALL)
     private List<Factura> facturasComoVendedor;
 
-    @ManyToMany
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "productos_personas",
             joinColumns = @JoinColumn(name = "persona_id"),
