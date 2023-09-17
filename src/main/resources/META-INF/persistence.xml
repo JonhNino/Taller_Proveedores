@@ -14,7 +14,7 @@
       <property name="javax.persistence.jdbc.driver" value="org.mariadb.jdbc.Driver" />
       <property name="javax.persistence.jdbc.url" value="jdbc:mariadb://localhost:3306/MAPEO_PROVEEDORES" />
       <property name="javax.persistence.jdbc.user" value="root" />
-      <property name="hibernate.show_sql" value="true" />
+      <property name="hibernate.show_sql" value="false" />
       <property name="hibernate.use_sql_comments" value="true"/>
       <property name="hibernate.hbm2ddl.auto" value="update"/>
     </properties>

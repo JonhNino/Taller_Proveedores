@@ -17,7 +17,7 @@ public class Logic {
         System.out.println("Connexion Mysql OK!");
         System.out.println("Bienvenido al Aplicativo MAPEO PROVEEDORES");
         System.out.println("Agregaremos data a la BD Taller_Proveedores");
-       // DataService.insertData(entityManager);
+        // DataService.insertData(entityManager);
         mostrarMenu(entityManager);
         scanner.close();
 
@@ -28,7 +28,7 @@ public class Logic {
         while (true) {
             menu();
             int seleccion = scanner.nextInt();
-            switchMenu(seleccion,entityManager);
+            switchMenu(seleccion, entityManager);
         }
 
     }
@@ -77,9 +77,12 @@ public class Logic {
                     } while (repetir);
                     break;
                 case 4:
-                    System.out.println("Seleccionaste la opcion 4");
-                    // Implementar la funcionalidad aquí
-                    System.out.println("-----------");
+                    do {
+                        System.out.println("Seleccionaste la opcion 4");
+                        ViewBill.viewBill(entityManager);
+                        System.out.println("-----------");
+                        repetir = preguntaRepetir();
+                    } while (repetir);
                     break;
                 case 0:
                     System.out.println("Saliendo del aplicativo");
