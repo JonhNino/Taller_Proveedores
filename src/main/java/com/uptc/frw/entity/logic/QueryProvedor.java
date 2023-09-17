@@ -16,7 +16,7 @@ public class QueryProvedor {
         List<Long> proveedorIds = mostrarProveedores(entityManager);
 
         while (true) {
-            System.out.print("Ingrese el Id del Proveedor al que se le va a Consultar los Productos que Provee: ");
+            System.out.println("Ingrese el Id del Proveedor al que se le va a Consultar los Productos que Provee: ");
             long idProveedor = scanner.nextLong();
 
             if (proveedorIds.contains(idProveedor)) {
@@ -75,9 +75,8 @@ public class QueryProvedor {
                 System.out.println("No se encontraron productos para el proveedor con ID: " + idProveedor);
             } else {
                 Persona persona =entityManager.getReference(Persona.class,idProveedor);
-                System.out.println("El Proveedor "+persona.getNombres()+" "+persona.getApellidos()+"Tiene los Siguentes productos Asociados");
+                System.out.println("El Proveedor "+persona.getNombres()+" "+persona.getApellidos()+" tiene los Siguentes productos asociados:");
                 for (Producto producto : productos) {
-
                     System.out.println("ID: " + producto.getId());
                     System.out.println("Nombre: " + producto.getNombre());
                     System.out.println("-----------");

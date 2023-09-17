@@ -28,8 +28,12 @@ public class TotalVentas {
             }
         }
 
-        System.out.println(queryVentas(entityManager,idVendedor));
-        System.out.println(queryDetalles(entityManager,queryVentas(entityManager,idVendedor)));
+        queryVentas(entityManager,idVendedor);
+        Persona vendedor = entityManager.getReference(Persona.class,idVendedor);
+        System.out.println("El vendedor "+vendedor.getNombres()+" "+vendedor.getApellidos()
+                +" a realizado "+queryVentas(entityManager,idVendedor).size()+
+                " ventas, con un total de : "+
+                queryDetalles(entityManager,queryVentas(entityManager,idVendedor)));
     }
 
     private static double queryDetalles(EntityManager entityManager, List<Long> facturaIds) {
@@ -60,7 +64,7 @@ public class TotalVentas {
                 entityManager.getTransaction().rollback();
             }
         }
-        return totalVentas;  // Retornamos el total de las ventas
+        return  totalVentas;
     }
 
 

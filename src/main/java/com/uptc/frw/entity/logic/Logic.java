@@ -45,33 +45,57 @@ public class Logic {
     }
 
     private static void switchMenu(int seleccion, EntityManager entityManager) throws ParseException {
+        Scanner scanner = new Scanner(System.in);
+        boolean repetir;
 
-        switch (seleccion) {
-            case 1:
-                System.out.println("Seleccionaste la opcion 1");
-                QueryBill.queryBills(entityManager);
-                System.out.println("-----------");
-                break;
-            case 2:
-                System.out.println("Seleccionaste la opcion 2");
-                QueryProvedor.queryProduct(entityManager);
-                System.out.println("-----------");
-                break;
-            case 3:
-                System.out.println("Seleccionaste la opcion 3");
-                TotalVentas.totalVentas(entityManager);
-                System.out.println("-----------");
-                break;
-            case 4:
-                System.out.println("Seleccionaste la opcion 4");
+        do {
+            repetir = false;
 
-                System.out.println("-----------");
-                break;
-            case 0:
-                System.out.println("Saliendo del aplicativo");
-                return;
-            default:
-                System.out.println("Seleccion no valida, por favor intenta de nuevo.");
-        }
+            switch (seleccion) {
+                case 1:
+                    do {
+                        System.out.println("Seleccionaste la opcion 1");
+                        QueryBill.queryBills(entityManager);
+                        System.out.println("-----------");
+                        repetir = preguntaRepetir();
+                    } while (repetir);
+                    break;
+                case 2:
+                    do {
+                        System.out.println("Seleccionaste la opcion 2");
+                        QueryProvedor.queryProduct(entityManager);
+                        System.out.println("-----------");
+                        repetir = preguntaRepetir();
+                    } while (repetir);
+                    break;
+                case 3:
+                    do {
+                        System.out.println("Seleccionaste la opcion 3");
+                        TotalVentas.totalVentas(entityManager);
+                        System.out.println("-----------");
+                        repetir = preguntaRepetir();
+                    } while (repetir);
+                    break;
+                case 4:
+                    System.out.println("Seleccionaste la opcion 4");
+                    // Implementar la funcionalidad aquí
+                    System.out.println("-----------");
+                    break;
+                case 0:
+                    System.out.println("Saliendo del aplicativo");
+                    return;
+                default:
+                    System.out.println("Seleccion no valida, por favor intenta de nuevo.");
+                    repetir = true;
+            }
+        } while (repetir);
     }
+
+    private static boolean preguntaRepetir() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("¿Desea repetir esta tarea? (s/n): ");
+        String respuesta = scanner.nextLine();
+        return respuesta.equalsIgnoreCase("s");
+    }
+
 }
