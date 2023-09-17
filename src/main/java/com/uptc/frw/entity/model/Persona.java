@@ -32,6 +32,9 @@ public class Persona {
     @Column(name = "numero_documento")
     private String numeroDocumento;
 
+    @Column(name = "direccion")
+    private String direccion;
+
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL)
     private List<Factura> facturasComoCliente;
 
@@ -49,12 +52,13 @@ public class Persona {
     public Persona() {
     }
 
-    public Persona(String nombres, String apellidos, Date fechaNacimiento, String tipoDocumento, String numeroDocumento) {
+    public Persona(String nombres, String apellidos, Date fechaNacimiento, String tipoDocumento, String numeroDocumento, String direccion) {
         this.nombres = nombres;
         this.apellidos = apellidos;
         this.fechaNacimiento = fechaNacimiento;
         this.tipoDocumento = tipoDocumento;
         this.numeroDocumento = numeroDocumento;
+        this.direccion = direccion;
     }
 
     public Long getId() {
@@ -105,6 +109,14 @@ public class Persona {
         this.numeroDocumento = numeroDocumento;
     }
 
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
+
     public List<Factura> getFacturasComoCliente() {
         return facturasComoCliente;
     }
@@ -138,6 +150,7 @@ public class Persona {
                 ", fechaNacimiento=" + fechaNacimiento +
                 ", tipoDocumento='" + tipoDocumento + '\'' +
                 ", numeroDocumento='" + numeroDocumento + '\'' +
+                ", direccion='"+direccion + '\'' +
                 '}';
     }
 }

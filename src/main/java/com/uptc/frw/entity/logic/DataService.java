@@ -24,6 +24,10 @@ public class DataService {
         Scanner scanner = new Scanner(System.in);
         System.out.print("¿Cuantos registros deseas ingresar en cada tabla? ");
         int numeroDeRegistros = scanner.nextInt();
+        if (numeroDeRegistros == 0) {
+            System.out.println("Has ingresado 0, no se crearan registros. Continuando con el programa...");
+            return;
+        }
         System.out.print("Vamos a Crear " + numeroDeRegistros + " registos en Cada tabla de la BD MAPEO_PROVEEDORES\n");
         System.out.print("Iniciamos Creando los registros para la tabla Productos\n");
         createProductos(entityManager, numeroDeRegistros);
@@ -47,13 +51,12 @@ public class DataService {
             boolean agregarOtroDetalle = true;
 
 
-                System.out.println("Creacion del Detalle " + (i + 1));
-                mostrarTodosLosFacturas(entityManager);
-                System.out.print("Ingrese el id de la Factura a detallar : ");
-                Long idFactrura = scanner.nextLong();
-                scanner.nextLine();
-                Factura factura = entityManager.find(Factura.class, idFactrura);
-                System.out.println(factura);
+            System.out.println("Creacion del Detalle " + (i + 1));
+            mostrarTodosLosFacturas(entityManager);
+            System.out.print("Ingrese el id de la Factura a detallar : ");
+            Long idFactrura = scanner.nextLong();
+            scanner.nextLine();
+            Factura factura = entityManager.find(Factura.class, idFactrura);
             while (agregarOtroDetalle) {
                 System.out.print("Ingrese la cantidad de Productos a Cobrar: ");
                 Integer cantidad = scanner.nextInt();
@@ -80,7 +83,7 @@ public class DataService {
                 Detalle detalle = new Detalle(cantidad, precioVenta, factura, producto);
                 entityManager.persist(detalle);
 
-                System.out.print("¿Desea agregar otro detalle al detalle "+(i + 1)+"? (s/n): ");
+                System.out.print("¿Desea agregar otro detalle al detalle " + (i + 1) + "? (s/n): ");
                 String respuesta = scanner.nextLine();
                 agregarOtroDetalle = respuesta.equalsIgnoreCase("s");
             }
@@ -253,8 +256,6 @@ public class DataService {
         Long idProducto = scanner.nextLong();
         scanner.nextLine();
         Producto producto = entityManager.find(Producto.class, idProducto);
-        System.out.println(producto);
-        System.out.println(persona);
         if (producto != null) {
             if (persona.getProductos() == null) {
                 persona.setProductos(new ArrayList<>());
@@ -293,7 +294,9 @@ public class DataService {
         String tipoDocumento = scanner.nextLine();
         System.out.print("Ingrese el numero de documento: ");
         String numeroDocumento = scanner.nextLine();
-        return new Persona(nombre, apellidos, fechaNacimiento, tipoDocumento, numeroDocumento);
+        System.out.print("Ingrese la Direccion de la Persona : ");
+        String direccion = scanner.nextLine();
+        return new Persona(nombre, apellidos, fechaNacimiento, tipoDocumento, numeroDocumento, direccion);
     }
 
     private static Date obtenerFecha(Scanner scanner, SimpleDateFormat formatoFecha) {

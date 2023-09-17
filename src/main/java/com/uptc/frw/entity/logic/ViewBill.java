@@ -2,6 +2,7 @@ package com.uptc.frw.entity.logic;
 
 import com.uptc.frw.entity.model.Detalle;
 import com.uptc.frw.entity.model.Factura;
+import com.uptc.frw.entity.model.Persona;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
@@ -42,11 +43,15 @@ public class ViewBill {
         System.out.println("Factura #  " + factura.getId());
         System.out.println();
         System.out.println(String.format("Cliente: %-30s Fecha Compra: %s", factura.getCliente().getNombres() + " " + factura.getCliente().getApellidos(), factura.getFecha()));
-        System.out.println("Direccion del Cliente: " );
+        System.out.println("Direccion del Cliente: "+factura.getCliente().getDireccion() );
         System.out.println();
 
         System.out.println(String.format("%-8s %-20s %-10s %-25s %-10s", "Id Item", "Nombre Producto", "Cantidad", "Valor Unitario de Venta", "Valor"));
-        System.out.println(String.format("%-8s %-20s %-10s %-25s %-10s", "-------", "----------------", "--------", "-----------------------", "-----")); List<Detalle> detalles =factura.getDetalles();
+        System.out.println(String.format("%-8s %-20s %-10s %-25s %-10s", "-------", "----------------", "--------", "-----------------------", "-----"));
+        TypedQuery<Detalle> queryDetalle = entityManager.createQuery("SELECT d FROM Detalle d WHERE d.factura.id = :facturaId", Detalle.class);
+        queryDetalle.setParameter("facturaId", factura.getId());
+        List<Detalle> detalles = queryDetalle.getResultList();
+
         double total = 0;
         for (Detalle detalle : detalles) {
             System.out.println(String.format("%-8d %-20s %-10d %-25.2f %-10.2f", detalle.getId(), detalle.getProducto().getNombre(), detalle.getCantidad(), detalle.getPrecioVenta(), (detalle.getPrecioVenta() * detalle.getCantidad())));
@@ -60,23 +65,38 @@ public class ViewBill {
     }
 
     private static List<Long> mostrarFacturas(EntityManager entityManager) {
-        TypedQuery<Factura> query = entityManager.createQuery("SELECT p FROM Factura p", Factura.class);
-        List<Factura> facturas = query.getResultList();
-        List<Long> facturaIds = new ArrayList<>();
+        TypedQuery<Long> query = entityManager.createQuery(
+                "SELECT DISTINCT f.id FROM Factura f JOIN Detalle d ON f.id = d.factura.id order by f.id ",
+                Long.class
+        );
 
-        for (Factura factura : facturas) {
-            facturaIds.add(factura.getId());
+        List<Long> facturaIds = query.getResultList();
 
-            System.out.println("ID: " + factura.getId());
-            System.out.println("Fecha de Factura: " + factura.getFecha());
-            System.out.println("Id del Cliente Asociado a esta Factura: " + factura.getCliente().getId());
-            System.out.println("Nombre del Cliente " + factura.getCliente().getNombres() + " " + factura.getCliente().getApellidos());
-            System.out.println("Id del Vendedor Asociado a esta Factura: " + factura.getVendedor().getId());
-            System.out.println("Nombre del Vendedor " + factura.getVendedor().getNombres() + " " + factura.getVendedor().getApellidos());
-            System.out.println("-----------");
+        for (Long facturaId : facturaIds) {
+            Factura factura = entityManager.find(Factura.class, facturaId);
+
+            if(factura != null) {
+                System.out.println("ID: " + factura.getId());
+                System.out.println("Fecha de Factura: " + factura.getFecha());
+
+                Persona cliente = factura.getCliente();
+                if(cliente != null) {
+                    System.out.println("Id del Cliente Asociado a esta Factura: " + cliente.getId());
+                    System.out.println("Nombre del Cliente " + cliente.getNombres() + " " + cliente.getApellidos());
+                }
+
+                Persona vendedor = factura.getVendedor();
+                if(vendedor != null) {
+                    System.out.println("Id del Vendedor Asociado a esta Factura: " + vendedor.getId());
+                    System.out.println("Nombre del Vendedor " + vendedor.getNombres() + " " + vendedor.getApellidos());
+                }
+
+                System.out.println("-----------");
+            }
         }
 
         return facturaIds;
     }
+
 
 }
