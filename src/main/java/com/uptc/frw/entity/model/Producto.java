@@ -1,7 +1,5 @@
 package com.uptc.frw.entity.model;
 
-import com.uptc.frw.entity.model.Detalle;
-import com.uptc.frw.entity.model.Persona;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -22,7 +20,8 @@ public class Producto {
     @Column(name = "precio_unitario")
     private Double precioUnitario;
 
-    @ManyToMany(mappedBy = "productos", cascade = CascadeType.ALL) private List<Persona> personas;
+    @ManyToMany(mappedBy = "productos", cascade = CascadeType.ALL)
+    private List<Persona> personas;
 
     @OneToMany(mappedBy = "producto",cascade = CascadeType.ALL)
     private List<Detalle> detalles;

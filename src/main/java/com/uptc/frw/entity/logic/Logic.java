@@ -17,13 +17,13 @@ public class Logic {
         System.out.println("Connexion Mysql OK!");
         System.out.println("Bienvenido al Aplicativo MAPEO PROVEEDORES");
         System.out.println("Agregaremos data a la BD Taller_Proveedores");
-        DataService.insertData(entityManager);
+       // DataService.insertData(entityManager);
         mostrarMenu(entityManager);
         scanner.close();
 
     }
 
-    public static void mostrarMenu(EntityManager entityManager) throws ParseException {
+    private static void mostrarMenu(EntityManager entityManager) throws ParseException {
 
         while (true) {
             menu();
@@ -50,15 +50,22 @@ public class Logic {
             case 1:
                 System.out.println("Seleccionaste la opcion 1");
                 QueryBill.queryBills(entityManager);
+                System.out.println("-----------");
                 break;
             case 2:
                 System.out.println("Seleccionaste la opcion 2");
+                QueryProvedor.queryProduct(entityManager);
+                System.out.println("-----------");
                 break;
             case 3:
                 System.out.println("Seleccionaste la opcion 3");
+
+                System.out.println("-----------");
                 break;
             case 4:
                 System.out.println("Seleccionaste la opcion 4");
+
+                System.out.println("-----------");
                 break;
             case 0:
                 System.out.println("Saliendo del aplicativo");
