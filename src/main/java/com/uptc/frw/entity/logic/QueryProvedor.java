@@ -48,7 +48,6 @@ public class QueryProvedor {
                     System.out.print(" Nombre: " + proveedor.getNombres());
                     System.out.println(" Apellidos: " + proveedor.getApellidos());
                     System.out.println("---------------------------");
-
                     proveedorIds.add(proveedor.getId());
                 }
             }

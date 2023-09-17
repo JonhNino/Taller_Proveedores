@@ -59,7 +59,7 @@ public class Logic {
                 break;
             case 3:
                 System.out.println("Seleccionaste la opcion 3");
-
+                TotalVentas.totalVentas(entityManager);
                 System.out.println("-----------");
                 break;
             case 4:
