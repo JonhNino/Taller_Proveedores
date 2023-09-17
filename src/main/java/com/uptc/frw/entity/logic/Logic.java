@@ -17,7 +17,6 @@ public class Logic {
         System.out.println("Connexion Mysql OK!");
         System.out.println("Bienvenido al Aplicativo MAPEO PROVEEDORES");
         System.out.println("Agregaremos data a la BD Taller_Proveedores");
-        DataService dataService = new DataService(entityManager);
         DataService.insertData(entityManager);
         mostrarMenu(entityManager);
         scanner.close();
@@ -50,7 +49,7 @@ public class Logic {
         switch (seleccion) {
             case 1:
                 System.out.println("Seleccionaste la opcion 1");
-
+                QueryBill.queryBills(entityManager);
                 break;
             case 2:
                 System.out.println("Seleccionaste la opcion 2");

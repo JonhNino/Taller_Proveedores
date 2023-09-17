@@ -24,20 +24,19 @@ public class DataService {
         Scanner scanner = new Scanner(System.in);
         System.out.print("¿Cuantos registros deseas ingresar en cada tabla? ");
         int numeroDeRegistros = scanner.nextInt();
-/*
         System.out.print("Vamos a Crear " + numeroDeRegistros + " registos en Cada tabla de la BD MAPEO_PROVEEDORES\n");
         System.out.print("Iniciamos Creando los registros para la tabla Productos\n");
-
         createProductos(entityManager, numeroDeRegistros);
+        System.out.println("-----------");
         System.out.print("Ahora Crearemos los registros para la tabla Personas\n");
         createPerson(entityManager, numeroDeRegistros);
+        System.out.println("-----------");
         System.out.print("Ahora Crearemos los registros para la tabla Facturas\n");
         createFacturas(entityManager, numeroDeRegistros);
-
- */
-
+        System.out.println("-----------");
         System.out.print("Ahora Crearemos los registros para la tabla Detalles Facturas\n");
         createDetallesFacturas(entityManager, numeroDeRegistros);
+        System.out.println("-----------");
     }
 
     private static void createDetallesFacturas(EntityManager entityManager, int numeroDeRegistros) {
@@ -45,42 +44,50 @@ public class DataService {
         Scanner scanner = new Scanner(System.in);
 
         for (int i = 0; i < numeroDeRegistros; i++) {
-            System.out.println("Creacion del Detalle " + (i + 1));
-            mostrarTodosLosFacturas(entityManager);
-            System.out.print("Ingrese el id de la Factura a detallar : ");
-            Long idFactrura = scanner.nextLong();
-            scanner.nextLine();
-            Factura factura = entityManager.find(Factura.class, idFactrura);
-            System.out.println(factura);
+            boolean agregarOtroDetalle = true;
 
-            System.out.print("Ingrese la cantidad de Productos a Cobrar: ");
-            Integer cantidad = scanner.nextInt();
-            scanner.nextLine();
 
-            Double precioVenta = null;
-            Producto producto = null;
-            while (precioVenta == null) {
-                try {
-                    mostrarTodosLosProductosCliente(entityManager);
-                    System.out.print("Ingrese el id del Producto a detallar : ");
-                    Long idProducto = scanner.nextLong();
-                    scanner.nextLine();
-                    producto = entityManager.find(Producto.class, idProducto);
-                    precioVenta = cantidad * producto.getPrecioUnitario();
-                    System.out.print("El precio de venta del Producto " + producto.getNombre() + " Es: " + precioVenta);
-                    scanner.nextLine();
-                } catch (InputMismatchException e) {
-                    System.out.println("Precio no válido. Por favor, inténtelo de nuevo.");
-                    scanner.next();
+                System.out.println("Creacion del Detalle " + (i + 1));
+                mostrarTodosLosFacturas(entityManager);
+                System.out.print("Ingrese el id de la Factura a detallar : ");
+                Long idFactrura = scanner.nextLong();
+                scanner.nextLine();
+                Factura factura = entityManager.find(Factura.class, idFactrura);
+                System.out.println(factura);
+            while (agregarOtroDetalle) {
+                System.out.print("Ingrese la cantidad de Productos a Cobrar: ");
+                Integer cantidad = scanner.nextInt();
+                scanner.nextLine();
+
+                Double precioVenta = null;
+                Producto producto = null;
+                while (precioVenta == null) {
+                    try {
+                        mostrarTodosLosProductosCliente(entityManager);
+                        System.out.print("Ingrese el id del Producto a detallar : ");
+                        Long idProducto = scanner.nextLong();
+                        scanner.nextLine();
+                        producto = entityManager.find(Producto.class, idProducto);
+                        precioVenta = cantidad * producto.getPrecioUnitario();
+                        System.out.print("El precio de venta del Producto " + producto.getNombre() + " Es: " + precioVenta);
+                        scanner.nextLine();
+                    } catch (InputMismatchException e) {
+                        System.out.println("Precio no válido. Por favor, inténtelo de nuevo.");
+                        scanner.next();
+                    }
                 }
+
+                Detalle detalle = new Detalle(cantidad, precioVenta, factura, producto);
+                entityManager.persist(detalle);
+
+                System.out.print("¿Desea agregar otro detalle al detalle "+(i + 1)+"? (s/n): ");
+                String respuesta = scanner.nextLine();
+                agregarOtroDetalle = respuesta.equalsIgnoreCase("s");
             }
-
-
-            Detalle detalle = new Detalle(cantidad, precioVenta, factura, producto);
-            entityManager.persist(detalle);
         }
         entityManager.getTransaction().commit();
     }
+
 
     private static void mostrarTodosLosProductosCliente(EntityManager entityManager) {
         TypedQuery<Producto> query = entityManager.createQuery(
