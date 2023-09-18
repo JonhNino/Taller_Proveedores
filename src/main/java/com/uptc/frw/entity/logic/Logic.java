@@ -5,6 +5,7 @@ import com.uptc.frw.entity.conf.PersistenceUtil;
 import jakarta.persistence.EntityManager;
 
 import java.text.ParseException;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Logic {
@@ -15,22 +16,32 @@ public class Logic {
     public Logic() throws ParseException {
         this.entityManager = PersistenceUtil.getEntityManager();
         init();
+        scanner.nextLine();
     }
 
     private void init() throws ParseException {
         System.out.println("Connexion Mysql OK!");
         System.out.println("Bienvenido al Aplicativo MAPEO PROVEEDORES");
         System.out.println("Agregaremos data a la BD Taller_Proveedores");
-        DataService.insertData(entityManager);
+        DataService dataService = new DataService(entityManager);
+        dataService.insertData();
         System.out.println("***********FIN INSERCION DATOS****************");
         mostrarMenu();
+        scanner.close();
     }
 
-    private void mostrarMenu() {
+    public void mostrarMenu() throws ParseException {
+
         while (true) {
             mostrarOpcionesMenu();
-            int seleccion = obtenerSeleccionMenu();
-            procesarSeleccionMenu(seleccion);
+            try {
+                System.out.print("Por favor, ingresa un numero: ");
+                String input = scanner.nextLine();
+                int seleccion = Integer.parseInt(input);
+                procesarSeleccionMenu(seleccion);
+            } catch (NumberFormatException e) {
+                System.out.println("Entrada no valida. Por favor, ingresa un número entero.");
+            }
         }
     }
 
@@ -43,9 +54,6 @@ public class Logic {
         System.out.println("0. Salir del Aplicativo.");
     }
 
-    private int obtenerSeleccionMenu() {
-        return scanner.nextInt();
-    }
 
     private void procesarSeleccionMenu(int seleccion) {
         boolean repetir;
@@ -89,18 +97,19 @@ public class Logic {
                     repetir = true;
             }
             repetir = preguntarSiRepetir();
+
         } while (repetir);
     }
 
-
     private boolean preguntarSiRepetir() {
-        System.out.println("¿Desea repetir esta tarea? (s/n): ");
-        String respuesta = scanner.next();
+        System.out.print("¿Desea repetir esta tarea? (s/n): ");
+        String respuesta = scanner.nextLine();
         return respuesta.equalsIgnoreCase("s");
     }
 
     public static void main(String[] args) throws ParseException {
         new Logic();
     }
+
 
 }

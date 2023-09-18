@@ -5,6 +5,7 @@ import com.uptc.frw.entity.model.Detalle;
 import com.uptc.frw.entity.model.Persona;
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -19,7 +20,7 @@ public class Factura {
     private Long id;
 
     @Column(name = "fecha")
-    private Date fecha;
+    private LocalDate  fecha;
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "cliente_id", nullable = false)
@@ -35,14 +36,15 @@ public class Factura {
     public Factura() {
     }
 
-    public Factura(Date fecha, Persona cliente, Persona vendedor) {
+    public Factura(LocalDate  fecha, Persona cliente, Persona vendedor) {
         this.fecha = fecha;
         this.cliente = cliente;
         this.vendedor = vendedor;
     }
 
-    public Factura(Date fechaFact, Long id, Long id1) {
-    }
+
+
+
 
     public Long getId() {
         return id;
@@ -52,11 +54,11 @@ public class Factura {
         this.id = id;
     }
 
-    public Date getFecha() {
+    public LocalDate  getFecha() {
         return fecha;
     }
 
-    public void setFecha(Date fecha) {
+    public void setFecha(LocalDate  fecha) {
         this.fecha = fecha;
     }
 

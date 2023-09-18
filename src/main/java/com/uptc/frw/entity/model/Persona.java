@@ -4,6 +4,7 @@ import com.uptc.frw.entity.model.Factura;
 import com.uptc.frw.entity.model.Producto;
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class Persona {
     private String apellidos;
 
     @Column(name = "fecha_nacimiento")
-    private Date fechaNacimiento;
+    private LocalDate fechaNacimiento;
 
     @Column(name = "tipo_documento")
     private String tipoDocumento;
@@ -52,7 +53,7 @@ public class Persona {
     public Persona() {
     }
 
-    public Persona(String nombres, String apellidos, Date fechaNacimiento, String tipoDocumento, String numeroDocumento, String direccion) {
+    public Persona(String nombres, String apellidos, LocalDate fechaNacimiento, String tipoDocumento, String numeroDocumento, String direccion) {
         this.nombres = nombres;
         this.apellidos = apellidos;
         this.fechaNacimiento = fechaNacimiento;
@@ -85,11 +86,11 @@ public class Persona {
         this.apellidos = apellidos;
     }
 
-    public Date getFechaNacimiento() {
+    public LocalDate getFechaNacimiento() {
         return fechaNacimiento;
     }
 
-    public void setFechaNacimiento(Date fechaNacimiento) {
+    public void setFechaNacimiento(LocalDate fechaNacimiento) {
         this.fechaNacimiento = fechaNacimiento;
     }
 
