@@ -10,27 +10,30 @@ import java.util.Scanner;
 
 public class Logic {
 
-    private static final Scanner scanner = new Scanner(System.in);
+
     private final EntityManager entityManager;
 
     public Logic() throws ParseException {
+        Scanner scanner = new Scanner(System.in);
         this.entityManager = PersistenceUtil.getEntityManager();
         init();
         scanner.nextLine();
     }
 
     private void init() throws ParseException {
+        Scanner scanner = new Scanner(System.in);
         System.out.println("Connexion Mysql OK!");
         System.out.println("Bienvenido al Aplicativo MAPEO PROVEEDORES");
         System.out.println("Agregaremos data a la BD Taller_Proveedores");
-        DataService dataService = new DataService(entityManager);
-        dataService.insertData();
+       // DataService dataService = new DataService(entityManager);
+        DataService.insertData(entityManager);
         System.out.println("***********FIN INSERCION DATOS****************");
-        mostrarMenu();
+        mostrarMenu(scanner);
         scanner.close();
+
     }
 
-    public void mostrarMenu() throws ParseException {
+    public void mostrarMenu(Scanner scanner) throws ParseException {
 
         while (true) {
             mostrarOpcionesMenu();
@@ -38,7 +41,7 @@ public class Logic {
                 System.out.print("Por favor, ingresa un numero: ");
                 String input = scanner.nextLine();
                 int seleccion = Integer.parseInt(input);
-                procesarSeleccionMenu(seleccion);
+                procesarSeleccionMenu(seleccion, scanner);
             } catch (NumberFormatException e) {
                 System.out.println("Entrada no valida. Por favor, ingresa un número entero.");
             }
@@ -55,38 +58,50 @@ public class Logic {
     }
 
 
-    private void procesarSeleccionMenu(int seleccion) {
+    private void procesarSeleccionMenu(int seleccion, Scanner scanner) {
         boolean repetir;
         do {
             repetir = false;
             switch (seleccion) {
                 case 1:
-                    System.out.println("Seleccionaste la opcion 1.");
-                    System.out.println("Metodo que permite consultar todas las facturas de un cliente");
-                    QueryBill queryBill = new QueryBill(entityManager, scanner);
-                    queryBill.queryBills();
-                    System.out.println("-----------");
+                    do {
+                        System.out.println("Seleccionaste la opcion 1.");
+                        System.out.println("Metodo que permite consultar todas las facturas de un cliente");
+                        QueryBill queryBill = new QueryBill(entityManager, scanner);
+                        queryBill.queryBills();
+                        System.out.println("-----------");
+                        repetir = preguntarSiRepetir();
+                    } while (repetir);
                     break;
                 case 2:
-                    System.out.println("Seleccionaste la opcion 2.");
-                    System.out.println("Metodo que permite consultar los productos que provee un proveedor.");
-                    QueryProvedor queryProvedor = new QueryProvedor(scanner);
-                    queryProvedor.queryProduct(entityManager);
-                    System.out.println("-----------");
+                    do {
+                        System.out.println("Seleccionaste la opcion 2.");
+                        System.out.println("Metodo que permite consultar los productos que provee un proveedor.");
+                        QueryProvedor queryProvedor = new QueryProvedor(scanner);
+                        queryProvedor.queryProduct(entityManager);
+                        System.out.println("-----------");
+                        repetir = preguntarSiRepetir();
+                    } while (repetir);
                     break;
                 case 3:
-                    System.out.println("Seleccionaste la opcion 3.");
-                    System.out.println("Metodo que a partir del id del vendedor muestre el valor total de las ventas de este.");
-                    TotalVentas totalVentas = new TotalVentas(scanner);
-                    totalVentas.mostrarTotalVentas(entityManager);
-                    System.out.println("-----------");
+                    do {
+                        System.out.println("Seleccionaste la opcion 3.");
+                        System.out.println("Metodo que a partir del id del vendedor muestre el valor total de las ventas de este.");
+                        TotalVentas totalVentas = new TotalVentas(scanner);
+                        totalVentas.mostrarTotalVentas(entityManager);
+                        System.out.println("-----------");
+                        repetir = preguntarSiRepetir();
+                    } while (repetir);
                     break;
                 case 4:
-                    System.out.println("Seleccionaste la opcion 4.");
-                    System.out.println("Metodo que  al ingresar un identificador de factura muestre por consola.");
-                    ViewBill viewBillInstance = new ViewBill(entityManager, scanner);
-                    viewBillInstance.viewBill();
-                    System.out.println("-----------");
+                    do {
+                        System.out.println("Seleccionaste la opcion 4.");
+                        System.out.println("Metodo que  al ingresar un identificador de factura muestre por consola.");
+                        ViewBill viewBillInstance = new ViewBill(entityManager, scanner);
+                        viewBillInstance.viewBill();
+                        System.out.println("-----------");
+                        repetir = preguntarSiRepetir();
+                    } while (repetir);
                     break;
                 case 0:
                     System.out.println("Saliendo del aplicativo.");
@@ -96,13 +111,12 @@ public class Logic {
                     System.out.println("Seleccion no valida, por favor intenta de nuevo.");
                     repetir = true;
             }
-            repetir = preguntarSiRepetir();
-
         } while (repetir);
     }
 
     private boolean preguntarSiRepetir() {
-        System.out.print("¿Desea repetir esta tarea? (s/n): ");
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("¿Desea repetir esta tarea? (s/n): ");
         String respuesta = scanner.nextLine();
         return respuesta.equalsIgnoreCase("s");
     }
